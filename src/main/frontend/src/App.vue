@@ -120,9 +120,8 @@ export default {
 }
 
 .alert-error {
-  background-color: red;
-  border: 1px solid black;
-  font-size: 20px;
-  padding: 5px;
+  background: indianred;
+  border-color: darkred;
+  color: white;
 }
 </style>
