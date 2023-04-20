@@ -7,8 +7,8 @@
       <MeetingsPage :username="authenticatedUsername"></MeetingsPage>
     </div>
 
- 
-  
+
+
   <div v-else>
      <button :class="signingUp ? 'button-outline' : '' "@click="signingUp = false"> Logowanie</button>
      <button :class="!signingUp ? 'button-outline' : '' "@click="signingUp = true"> Rejestracja</button>
@@ -16,10 +16,16 @@
        <div v-if="message" class="alert">
         {{message}}
        </div>
-    
+
 
       <LoginForm v-if ="!signingUp" @login="(user) => logMeIn(user)"></LoginForm>
       <LoginForm v-else @login="(user) => register(user)" button-label="Załóż konto"></LoginForm>
+    <div v-else>
+      <button @click="registering = false" :class="registering ? 'button-outline' : ''">Logowanie</button>
+      <button @click="registering = true" :class="!registering ? 'button-outline' : ''">Rejestracja</button>
+      <div :class="'alert alert-' + (this.isError ? 'error' : 'success')" v-if="message">{{ message }}</div>
+      <LoginForm v-if="registering" @login="(user) => register(user)" button-label="Załóż konto"></LoginForm>
+      <LoginForm v-else @login="(user) => logMeIn(user)"></LoginForm>
     </div>
   </div>
 </template>
@@ -38,21 +44,33 @@ export default {
       message: '',
       signingUp: false,
       authenticatedUsername: '',
+      registering: false,
+      message: '',
+      isError: false,
     }
   },
   methods: {
+    register(user) {
+      this.clearMessage();
+      axios.post('/api/participants', user)
+          .then(() => {
+            this.success('Konto zostało założone. Możesz się zalogować.');
+            this.registering = false;
+          })
+          .catch(error => this.failure(`Błąd przy zakładaniu konta. Kod odpowiedzi: ${error.response.status}`));
+    },
     logMeIn(user) {
       axios.post('/api/tokens', user)
           .then(response => {
             this.authenticatedUsername=user.login;
             const token = response.data.token;
-            axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;  
+            axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
             axios.get('api/meetings')
                 then(response => console.log(response.data));
                 this.message = 'udało się zalogować';
           })
           .catch(response => {
-              this.message = 'nie udało sie zazalogować';
+              this.message = 'nie udało sie zalogować';
           });
     },
     logMeOut() {
@@ -68,6 +86,18 @@ export default {
               this.message = 'nie udało sie założyć konta';
           });
     }
+    },
+    success(message) {
+      this.message = message;
+      this.isError = false;
+    },
+    failure(message) {
+      this.message = message;
+      this.isError = true;
+    },
+    clearMessage() {
+      this.message = undefined;
+    },
   }
 }
 </script>
@@ -79,7 +109,17 @@ export default {
 }
 
 .alert {
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 2px solid black;
+}
 
+.alert-success {
+  background: lightgreen;
+  border-color: green;
+}
+
+.alert-error {
   background-color: red;
   border: 1px solid black;
   font-size: 20px;
