@@ -8,7 +8,11 @@
     </div>
 
     <div v-else>
-      <LoginForm @login="(user) => logMeIn(user)"></LoginForm>
+     <button :class="signingUp ? 'button-outline' : '' "@click="signingUp = false"> Logowanie</button>
+     <button :class="!signingUp ? 'button-outline' : '' "@click="signingUp = true"> Rejestracja</button>
+
+      <LoginForm v-if ="!siningUp" @login="(user) => logMeIn(user)"></LoginForm>
+      <LoginForm v-else @login="(user) => logMeIn(user)" button-label="Załóż konto"></LoginForm>
     </div>
   </div>
 </template>
@@ -23,6 +27,7 @@ export default {
   components: {LoginForm, MeetingsPage, UserPanel},
   data() {
     return {
+      signingUp: false,
       authenticatedUsername: '',
     }
   },
@@ -32,6 +37,15 @@ export default {
     },
     logMeOut() {
       this.authenticatedUsername = '';
+    },
+    register(user) {
+      axios.post('participants', user)
+          .then(response => {
+              // udało się
+          })
+          .catch(response => {
+              // nie udało sie
+          });
     }
   }
 }
