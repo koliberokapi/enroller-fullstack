@@ -21,8 +21,8 @@
       <LoginForm v-if ="!signingUp" @login="(user) => logMeIn(user)"></LoginForm>
       <LoginForm v-else @login="(user) => register(user)" button-label="Załóż konto"></LoginForm>
     <div v-else>
-      <button @click="registering = false" :class="registering ? 'button-outline' : ''">Logowanie</button>
-      <button @click="registering = true" :class="!registering ? 'button-outline' : ''">Rejestracja</button>
+      <button @click="registering = false" :class="registering ? 'button-outline' : ''">Loguję się</button>
+      <button @click="registering = true" :class="!registering ? 'button-outline' : ''">Rejestruję się</button>
       <div :class="'alert alert-' + (this.isError ? 'error' : 'success')" v-if="message">{{ message }}</div>
       <LoginForm v-if="registering" @login="(user) => register(user)" button-label="Załóż konto"></LoginForm>
       <LoginForm v-else @login="(user) => logMeIn(user)"></LoginForm>
@@ -35,7 +35,7 @@ import "milligram";
 import LoginForm from "./LoginForm";
 import UserPanel from "./UserPanel";
 import MeetingsPage from "./meetings/MeetingsPage";
-import axios from "axios"
+import axios from "axios";
 
 export default {
   components: {LoginForm, MeetingsPage, UserPanel},
@@ -71,7 +71,13 @@ export default {
     logMeIn(user) {
       axios.post('/api/tokens', user)
           .then(response => {
-            this.authenticatedUsername=user.login;
+            this.clearMessage();
+      axios.post('/api/tokens', user)
+          .then((response) => {
+            const token = response.data.token;
+            this.storeAuth(user.login, token);
+          })
+          .catch(() => this.failure('Logowanie nieudane.'));
             const token = response.data.token;
             axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
             axios.get('api/meetings')
@@ -103,6 +109,26 @@ export default {
               this.message = 'nie udało sie założyć konta';
           });
     }
+    },
+    success(message) {
+      this.message = message;
+      this.isError = false;
+    },
+    failure(message) {
+      this.message = message;
+      this.isError = true;
+    },
+    clearMessage() {
+      this.message = undefined;
+    },
+      delete axios.defaults.headers.common.Authorization;
+      localStorage.clear();
+    },
+    storeAuth(username, token) {
+      this.authenticatedUsername = username;
+      axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+      localStorage.setItem('username', username);
+      localStorage.setItem('token', token);
     },
     success(message) {
       this.message = message;
