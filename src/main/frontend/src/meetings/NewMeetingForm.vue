@@ -11,19 +11,26 @@
 </template>
 
 <script>
+import response from "core-js/internals/is-forced";
+import axios from "axios";
+
 export default {
   data() {
     return {
       newMeeting: {participants: []},
+      name: '',
+      date: '',
+      description: '',
       error: false,
     };
   },
   methods: {
-    addNewMeeting() {
+    async addNewMeeting() {
       this.error = false;
       if (this.newMeeting.name) {
         this.$emit('added', this.newMeeting);
         this.newMeeting = {participants: []};
+      console.log(response.data);
       } else {
         this.error = true;
       }

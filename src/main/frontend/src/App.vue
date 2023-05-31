@@ -63,6 +63,7 @@ export default {
           .catch(() => this.failure('Logowanie nieudane.'));
     },
     logMeOut() {
+      axios.delete('/api/tokens')
       this.authenticatedUsername = '';
       delete axios.defaults.headers.common.Authorization;
       localStorage.clear();
