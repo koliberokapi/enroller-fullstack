@@ -2,7 +2,7 @@
   <form @submit.prevent="addNewMeeting()">
     <h3>Dodaj nowe spotkanie</h3>
     <label>Nazwa</label>
-    <input type="text" v-model="newMeeting.name">
+    <input type="text" v-model="newMeeting.title">
     <label>Opis</label>
     <textarea v-model="newMeeting.description"></textarea>
     <button>Dodaj</button>
@@ -11,26 +11,19 @@
 </template>
 
 <script>
-import response from "core-js/internals/is-forced";
-import axios from "axios";
-
 export default {
   data() {
     return {
       newMeeting: {participants: []},
-      name: '',
-      date: '',
-      description: '',
       error: false,
     };
   },
   methods: {
-    async addNewMeeting() {
+    addNewMeeting() {
       this.error = false;
-      if (this.newMeeting.name) {
+      if (this.newMeeting.title) {
         this.$emit('added', this.newMeeting);
         this.newMeeting = {participants: []};
-      console.log(response.data);
       } else {
         this.error = true;
       }

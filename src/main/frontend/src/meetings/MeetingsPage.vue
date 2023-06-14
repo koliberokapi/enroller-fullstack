@@ -17,28 +17,81 @@ import MeetingsList from "./MeetingsList";
 import axios from "axios";
 
 export default {
+
   components: {NewMeetingForm, MeetingsList},
   props: {username: String},
   data() {
     return {
-      meetings: []
+      meetings: [],
     };
   },
-  methods: {
-    async addNewMeeting(meeting) {
-      const response = await axios.post('/api/meetings', this.newMeeting);
 
-      this.meetings.push(meeting);
+  async created() {
+    try {
+      const meetingsResponse = await axios.get('/api/meetings');
+      const meetingsWithParticipants = await Promise.all(
+          meetingsResponse.data.map(async (meeting) => {
+            const participantsResponse = await axios.get(`/api/meetings/${meeting.id}/participants`);
+            return { ...meeting, participants: participantsResponse.data };
+          }),
+      );
+      this.meetings = meetingsWithParticipants;
+    } catch (error) {
+      console.error(error);
+    }
+  },
+
+
+
+  methods: {
+    addNewMeeting(meeting) {
+      axios.post("/api/meetings",
+          {title: meeting.title,
+            description: meeting.description,
+          } )
+          .then((response) => {
+            this.meetings.push({
+              id: response.data.id,
+              title: response.data.title,
+              description: response.data.description,
+              participants: []});
+          })
+          .catch(error => {
+            this.errorMessage = error.message;
+            console.error("There was an error!", error);
+          });
+
     },
     addMeetingParticipant(meeting) {
-      meeting.participants.push(this.username);
-    },
+      axios.post(`/api/meetings/${meeting.id}/participants`, {login: this.username})
+          .then(() => {
+            meeting.participants.push(this.username);
+            })
+          .catch(error => {
+            this.errorMessage = error.message;
+            console.error("There was an error!", error);
+          });
+      },
     removeMeetingParticipant(meeting) {
-      meeting.participants.splice(meeting.participants.indexOf(this.username), 1);
-    },
+      axios.delete(`/api/meetings/${meeting.id}/participants/${this.username}`)
+          .then(() => {
+            meeting.participants.splice(meeting.participants.indexOf(this.username), 1);
+            })
+          .catch(error => {
+            this.errorMessage = error.message;
+            console.error("There was an error!", error);
+          });
+      },
     deleteMeeting(meeting) {
-      this.meetings.splice(this.meetings.indexOf(meeting), 1);
-    },
+      axios.delete('/api/meetings/'+meeting.id)
+          .then(() => {
+            this.meetings.splice(this.meetings.indexOf(meeting), 1);
+            })
+          .catch(error => {
+            this.errorMessage = error.message;
+            console.error("There was an error!", error);
+          });
+      },
   }
 }
 </script>

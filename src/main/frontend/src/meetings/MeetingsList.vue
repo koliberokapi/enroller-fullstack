@@ -9,13 +9,13 @@
     </tr>
     </thead>
     <tbody>
-    <tr v-for="meeting in meetings" :key="meeting.name">
-      <td>{{ meeting.name }}</td>
+    <tr v-for="meeting in meetings" :key="meeting.id">
+      <td>{{ meeting.title }}</td>
       <td>{{ meeting.description }}</td>
       <td>
         <ul v-if="meeting.participants">
-          <li v-for="participant in meeting.participants" :key="participant">
-            {{ participant }}
+          <li v-for="participant in meeting.participants" :key="participant.login">
+            {{ participant.login }}
           </li>
         </ul>
       </td>
@@ -36,6 +36,7 @@
 </template>
 
 <script>
+import MeetingsPage from "./MeetingsPage";
 export default {
   props: {
     meetings: Array,

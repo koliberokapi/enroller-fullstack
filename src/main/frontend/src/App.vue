@@ -41,6 +41,7 @@ export default {
       this.storeAuth(username, token);
       // if token expired or user has been deleted - logout!
       axios.get(`/api/meetings`).catch(() => this.logMeOut());
+
     }
   },
   methods: {
@@ -63,10 +64,10 @@ export default {
           .catch(() => this.failure('Logowanie nieudane.'));
     },
     logMeOut() {
-      axios.delete('/api/tokens')
       this.authenticatedUsername = '';
       delete axios.defaults.headers.common.Authorization;
       localStorage.clear();
+
     },
     storeAuth(username, token) {
       this.authenticatedUsername = username;
